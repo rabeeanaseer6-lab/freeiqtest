@@ -40,7 +40,7 @@ export default function Test() {
 
   const handleAnswer = (answerIndex: number) => {
     setAnswers(prev => ({ ...prev, [currentQuestionIndex]: answerIndex }));
-    
+
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
@@ -56,23 +56,39 @@ export default function Test() {
       }
     });
 
-    // Simple score calculation: 70 + (correct / 30) * 75 -> max 145, min 70
     const score = Math.round(70 + (correct / questions.length) * 75);
     const timeTaken = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0;
 
-    submitResult.mutate({
-      data: {
-        userName: userName || undefined,
-        score,
-        timeTaken,
-        correctAnswers: correct,
-        totalQuestions: questions.length
+    const localResult = {
+      id: 0,
+      userName: userName || null,
+      score,
+      timeTaken,
+      correctAnswers: correct,
+      totalQuestions: questions.length,
+      percentile: calculatePercentile(score),
+      createdAt: new Date().toISOString(),
+    };
+
+    sessionStorage.setItem('iq_local_result', JSON.stringify(localResult));
+    setLocation('/results/local');
+
+    submitResult.mutate(
+      {
+        data: {
+          userName: userName || undefined,
+          score,
+          timeTaken,
+          correctAnswers: correct,
+          totalQuestions: questions.length,
+        },
+      },
+      {
+        onSuccess: (result) => {
+          setLocation(`/results/${result.id}`);
+        },
       }
-    }, {
-      onSuccess: (result) => {
-        setLocation(`/results/${result.id}`);
-      }
-    });
+    );
   };
 
   const formatTime = (seconds: number) => {
@@ -92,13 +108,13 @@ export default function Test() {
               </div>
               <h1 className="text-3xl font-bold text-slate-900 mb-4">Official Cognitive Assessment</h1>
               <p className="text-lg text-slate-600 mb-8">
-                This assessment consists of 30 questions designed to measure logical, spatial, and numerical reasoning. 
+                This assessment consists of 30 questions designed to measure logical, spatial, and numerical reasoning.
                 Find a quiet place. You will have approximately 20 minutes.
               </p>
               <form onSubmit={handleStart} className="max-w-sm mx-auto space-y-4">
                 <div>
-                  <Input 
-                    placeholder="Enter your name or location (optional)" 
+                  <Input
+                    placeholder="Enter your name or location (optional)"
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
                     className="text-center"
@@ -117,13 +133,13 @@ export default function Test() {
   }
 
   const currentQuestion = questions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex) / questions.length) * 100;
+  const progress = (currentQuestionIndex / questions.length) * 100;
 
   return (
     <Layout>
       <div className="bg-slate-50 min-h-[calc(100vh-64px)] py-8">
         <div className="container mx-auto max-w-3xl px-4">
-          
+
           <div className="flex items-center justify-between mb-4">
             <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
               Question {currentQuestionIndex + 1} of {questions.length}
@@ -133,7 +149,7 @@ export default function Test() {
               {formatTime(timeElapsed)}
             </div>
           </div>
-          
+
           <Progress value={progress} className="h-2 mb-8 bg-slate-200" />
 
           <Card className="border-0 shadow-md mb-8">
@@ -141,7 +157,7 @@ export default function Test() {
               <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 mb-6">
                 {currentQuestion.category}
               </div>
-              
+
               <h2 className="text-xl md:text-2xl font-medium text-slate-900 mb-8 leading-relaxed">
                 {currentQuestion.text}
               </h2>
@@ -161,14 +177,25 @@ export default function Test() {
             </CardContent>
           </Card>
 
-          {submitResult.isPending && (
-            <div className="text-center text-slate-500 py-4 animate-pulse">
-              Calculating your results...
-            </div>
-          )}
-          
         </div>
       </div>
     </Layout>
   );
+}
+
+function calculatePercentile(score: number): number {
+  if (score >= 130) return 98;
+  if (score >= 125) return 95;
+  if (score >= 120) return 91;
+  if (score >= 115) return 84;
+  if (score >= 110) return 75;
+  if (score >= 105) return 63;
+  if (score >= 100) return 50;
+  if (score >= 95) return 37;
+  if (score >= 90) return 25;
+  if (score >= 85) return 16;
+  if (score >= 80) return 9;
+  if (score >= 75) return 5;
+  if (score >= 70) return 2;
+  return 1;
 }
