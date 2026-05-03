@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /results
+Disallow: /api/
+
+Sitemap: https://freeiqtest.online/sitemap.xml
