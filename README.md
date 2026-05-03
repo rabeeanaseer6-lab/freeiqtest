@@ -10,6 +10,8 @@
 > A professional, high-authority IQ testing platform deployed at **[freeiqtestonline.online](https://freeiqtestonline.online)**. This platform delivers a scientifically calibrated 30-question cognitive assessment using IRT-based scoring, instant percentile analysis, a live global leaderboard, and a comprehensive educational ecosystem built to drive high organic search traffic.
 
 ---
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/9c897b91-7825-4906-a51b-7e668f59e1d8" />
+
 
 ## 📑 Table of Contents
 - [Overview](#-overview)
